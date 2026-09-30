@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
-import { SOCKET_URL } from '../config';
-// import { useAuthStore } from './auth.store';
+
+import { SOCKET_URL } from '@/config';
 
 export interface Peer {
   socketId: string;

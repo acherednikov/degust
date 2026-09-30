@@ -171,6 +171,7 @@ export class SignalingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: OfferDto,
   ) {
+    this.logger.log(`[offer] ${client.id} → ${dto.targetSocketId}, sdp length: ${dto.sdp.length}`);
     this.server.to(dto.targetSocketId).emit('offer', {
       fromSocketId: client.id,
       sdp: dto.sdp,
@@ -182,6 +183,7 @@ export class SignalingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: AnswerDto,
   ) {
+    this.logger.log(`[answer] ${client.id} → ${dto.targetSocketId}, sdp length: ${dto.sdp.length}`);
     this.server.to(dto.targetSocketId).emit('answer', {
       fromSocketId: client.id,
       sdp: dto.sdp,
@@ -193,6 +195,7 @@ export class SignalingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: IceCandidateDto,
   ) {
+    this.logger.log(`[ice-candidate] ${client.id} → ${dto.targetSocketId}, candidate length: ${dto.candidate.length}`);
     this.server.to(dto.targetSocketId).emit('ice-candidate', {
       fromSocketId: client.id,
       candidate: dto.candidate,

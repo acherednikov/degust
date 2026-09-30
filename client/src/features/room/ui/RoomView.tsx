@@ -5,6 +5,8 @@ import { MicPermission } from '@/components/shared/MicPermission';
 import { useAuthStore } from '@/stores/auth.store';
 import { useSignalingStore } from '@/stores/signaling.store';
 
+import { PeerConnectionManager } from './PeerConnectionManager';
+
 export function RoomView() {
   const user = useAuthStore((s) => s.user);
   const {
@@ -50,6 +52,7 @@ export function RoomView() {
 
           <div className="space-y-4">
             <MicPermission />
+            <PeerConnectionManager />
           </div>
 
           <Card>
