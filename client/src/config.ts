@@ -1,6 +1,7 @@
-export const API_URL = '/api';
-// import.meta.env.VITE_SOCKET_URL
-export const SOCKET_URL = window.location.origin; // проксируется Vite'ом
+export const API_URL = import.meta.env.VITE_API_URL ?? '/api';
+
+export const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ?? window.location.origin;
 
 export const ICE_SERVERS: RTCIceServer[] = [
   { urls: 'stun:stun.l.google.com:19302' },
