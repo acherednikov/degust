@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/shared/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
+import { MicPermission } from '@/components/shared/MicPermission';
 
 import { useAuthStore } from '@/stores/auth.store';
 import { useSignalingStore } from '@/stores/signaling.store';
@@ -45,6 +46,10 @@ export function RoomView() {
             <Button variant="outline" size="sm" onClick={leaveRoom}>
               Выйти
             </Button>
+          </div>
+
+          <div className="space-y-4">
+            <MicPermission />
           </div>
 
           <Card>

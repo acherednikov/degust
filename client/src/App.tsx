@@ -1,6 +1,6 @@
 import { LoginForm } from '@/features/auth/ui/AuthForm';
 import { RoomView } from '@/features/room/ui/RoomView';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/shared/button';
 
 import { useAuthStore } from '@/stores/auth.store';
 import { useSignalingStore } from '@/stores/signaling.store';

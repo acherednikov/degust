@@ -1,8 +1,8 @@
 import { type SubmitEvent, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/shared/button';
+import { Input } from '@/components/shared/input';
+import { Label } from '@/components/shared/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
 
 import { useAuthStore } from '@/stores/auth.store';
 
