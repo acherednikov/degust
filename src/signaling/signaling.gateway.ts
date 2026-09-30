@@ -40,7 +40,7 @@ import { WsExceptionFilter } from '../common/filters/ws-exception.filter.js';
     credentials: true,
   },
   // namespace опционален; можно оставить по умолчанию '/'
-  namespace: 'signaling',
+  // namespace: 'signaling',
 })
 export class SignalingGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -116,8 +116,8 @@ export class SignalingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: JoinRoomDto,
   ) {
-      const user = client.data.user; // ← из JWT, не из DTO
-      if (!user) throw new WsException('Unauthorized');
+    const user = client.data.user; // ← из JWT, не из DTO
+    if (!user) throw new WsException('Unauthorized');
 
     // На всякий случай: если сокет уже сидит в какой-то комнате — выкидываем
     const existingRoom = this.signaling.findRoomBySocket(client.id);
@@ -128,7 +128,7 @@ export class SignalingGateway
     const peer: Peer = {
       socketId: client.id,
       userId: user.userId,
-      displayName: dto.displayName,
+      displayName: user.displayName,
       muted: false,
       joinedAt: Date.now(),
     };

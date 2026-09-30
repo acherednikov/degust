@@ -6,9 +6,4 @@ export class JoinRoomDto {
   @MinLength(1)
   @MaxLength(64)
   roomId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(64)
-  displayName: string;
 }
