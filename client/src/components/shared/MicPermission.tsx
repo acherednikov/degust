@@ -1,3 +1,5 @@
+import { Mic, MicOff } from 'lucide-react';
+
 import { Button } from '@/components/shared/button';
 import { useLocalMedia } from '@/hooks/useLocalMedia';
 
@@ -23,7 +25,7 @@ export function MicPermission() {
   return (
     <div className="flex items-center gap-3">
       <Button variant={enabled ? 'default' : 'secondary'} onClick={toggleMute}>
-        {enabled ? '🎙️ Микрофон вкл' : '🔇 Микрофон выкл'}
+        {enabled ? <Mic /> : <MicOff />}
       </Button>
     </div>
   );

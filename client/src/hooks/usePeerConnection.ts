@@ -17,6 +17,7 @@ export function usePeerConnection(peer: Peer) {
 
   const [connectionState, setConnectionState] = useState<RTCPeerConnectionState>('new');
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [pcInstance, setPcInstance] = useState<RTCPeerConnection | null>(null);
 
   const selfSocketId = useSignalingStore((s) => s.selfSocketId);
   const socket = useSignalingStore((s) => s.socket);
@@ -34,6 +35,7 @@ export function usePeerConnection(peer: Peer) {
 
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
     pcRef.current = pc;
+    setPcInstance(pc);
 
     // 1. Добавляем локальные треки
     localStream.getTracks().forEach((track) => {
@@ -138,6 +140,7 @@ export function usePeerConnection(peer: Peer) {
       socket.off('ice-candidate', handleIce);
       pc.close();
       pcRef.current = null;
+      setPcInstance(null);
       pendingIceRef.current = [];
       setRemoteStream(null);
       setConnectionState('closed');
@@ -153,7 +156,7 @@ export function usePeerConnection(peer: Peer) {
     sendIce,
   ]);
 
-  return { connectionState, remoteStream };
+  return { connectionState, remoteStream, pc: pcInstance };
 }
 
 async function drainPendingIce(

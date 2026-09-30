@@ -2,14 +2,19 @@ import { useEffect, useRef } from 'react';
 
 import { type Peer } from '@/stores/signaling.store';
 import { usePeerConnection } from '@/hooks/usePeerConnection';
+import { usePeerAudioLevel } from '@/hooks/usePeerAudioLevel';
+
+import { PeerItem } from './PeerItem';
 
 interface Props {
   peer: Peer;
 }
 
 export function PeerConnection({ peer }: Props) {
-  const { remoteStream } = usePeerConnection(peer);
+  const { remoteStream, pc } = usePeerConnection(peer);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  const { level, isSpeaking } = usePeerAudioLevel(pc, false, { threshold: 0.05 });
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -23,6 +28,7 @@ export function PeerConnection({ peer }: Props) {
   return (
     <>
       <audio ref={audioRef} autoPlay />
+      <PeerItem peer={peer} isSpeaking={isSpeaking} level={level} />
       {/* для отладки: */}
       {/* <span className="text-xs">{peer.displayName}: {connectionState}</span> */}
     </>

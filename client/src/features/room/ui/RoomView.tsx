@@ -2,13 +2,20 @@ import { Button } from '@/components/shared/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
 import { MicPermission } from '@/components/shared/MicPermission';
 
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuth } from '@/hooks/useAuth';
+import { useRoomSession } from '@/hooks/useRoomSession';
 import { useSignalingStore } from '@/stores/signaling.store';
+// import { useLocalMediaStore } from '@/stores/local-media.store';
 
 import { PeerConnectionManager } from './PeerConnectionManager';
+// import { useLocalAudioLevel } from '@/hooks/useLocalAudioLevel';
+// import { PeerItem } from './PeerItem';
 
 export function RoomView() {
-  const user = useAuthStore((s) => s.user);
+  const { user } = useAuth();
+
+  useRoomSession();
+
   const {
     connected,
     joinRoom,
@@ -17,6 +24,9 @@ export function RoomView() {
     peers,
     selfSocketId,
   } = useSignalingStore();
+
+  // const localStream = useLocalMediaStore((s) => s.stream);
+  // const { level, isSpeaking } = useLocalAudioLevel(localStream);
 
   const handleJoin = () => {
     console.log('[RoomView] join clicked, connected =', connected);
@@ -49,6 +59,12 @@ export function RoomView() {
               Выйти
             </Button>
           </div>
+
+          {/* {user && <PeerItem
+            peer={{ displayName: user.displayName, muted: !localStream?.getAudioTracks()[0]?.enabled }}
+            isSpeaking={isSpeaking}
+            level={level}
+          />} */}
 
           <div className="space-y-4">
             <MicPermission />
