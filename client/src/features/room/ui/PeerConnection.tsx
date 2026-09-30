@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function PeerConnection({ peer }: Props) {
-  const { connectionState, remoteStream } = usePeerConnection(peer);
+  const { remoteStream } = usePeerConnection(peer);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {

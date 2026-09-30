@@ -33,10 +33,6 @@ function decodeJwt(token: string): JwtPayload | null {
   }
 }
 
-function isExpired(payload: JwtPayload): boolean {
-  return payload.exp * 1000 < Date.now();
-}
-
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
