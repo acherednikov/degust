@@ -16,13 +16,17 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client      # ← вот это ключевое
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: 20
           cache: npm
+          cache-dependency-path: client/package-lock.json   # ← путь к лок-файлу фронта
 
       - name: Install dependencies
         run: npm ci
@@ -35,7 +39,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: client/dist    # ← путь к dist фронта
 
   deploy:
     needs: build
