@@ -1,10 +1,15 @@
-import path from "path";
+import path from 'path';
 import { defineConfig } from 'vite';
-import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    tanstackRouter({ target: 'react', autoCodeSplitting: true, routesDirectory: 'src/app/routes' }),
+    react(),
+    tailwindcss(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -25,5 +30,5 @@ export default defineConfig({
       },
     },
   },
-  base: '/degust/',
+  base: process.env.VITE_BASE || '/',
 });

@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
+import { useParams } from '@tanstack/react-router';
 
 import { useSignalingStore } from '@/stores/signaling.store';
 import { useLocalMediaStore } from '@/stores/local-media.store';
 
 export function useRoomSession() {
-  const roomId = useSignalingStore((s) => s.roomId);
+  const { roomId } = useParams({ from: '/room/$roomId' });
   const connected = useSignalingStore((s) => s.connected);
 
   const stream = useLocalMediaStore((s) => s.stream);

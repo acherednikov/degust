@@ -30,7 +30,6 @@ export interface IncomingIce {
 interface SignalingState {
   socket: Socket | null;
   connected: boolean;
-  roomId: string | null;
   selfSocketId: string | null;
   peers: Peer[];
 
@@ -48,7 +47,7 @@ interface SignalingState {
 export const useSignalingStore = create<SignalingState>((set, get) => ({
   socket: null,
   connected: false,
-  roomId: null,
+  // roomId: null,
   selfSocketId: null,
   peers: [],
 
@@ -56,17 +55,6 @@ export const useSignalingStore = create<SignalingState>((set, get) => ({
     // Уже есть живой сокет — не трогаем
     if (get().socket) return;
 
-    // const socket = io(SOCKET_URL, {
-    //   auth: { token },
-    //   // не форсируем transports — пусть Socket.IO сам выберет
-    // });
-
-    // const existing = get().socket;
-
-    // if (existing?.connected) return;
-    // if (existing) existing.disconnect(); // если есть, но мёртв — убиваем
-
-    // const token = useAuthStore.getState().token;
     if (!token) {
       console.warn('No token, cannot connect');
       return;
@@ -82,7 +70,7 @@ export const useSignalingStore = create<SignalingState>((set, get) => ({
     });
 
     socket.on('disconnect', () => {
-      set({ connected: false, peers: [], roomId: null, selfSocketId: null });
+      set({ connected: false, peers: [], selfSocketId: null });
     });
 
     socket.on('room-joined', ({ selfSocketId, peers }) => {
@@ -121,14 +109,13 @@ export const useSignalingStore = create<SignalingState>((set, get) => ({
     if (socket) {
       socket.disconnect();
     }
-    set({ socket: null, connected: false, roomId: null, peers: [], selfSocketId: null });
+    set({ socket: null, connected: false, peers: [], selfSocketId: null });
   },
 
   joinRoom: (roomId) => {
     const socket = get().socket;
     console.log('[joinRoom] called. roomId:', roomId, 'socket:', socket?.id, 'connected:', socket?.connected);
     if (!socket) return;
-    set({ roomId });
     socket.emit('join-room', { roomId });
   },
 
@@ -136,7 +123,7 @@ export const useSignalingStore = create<SignalingState>((set, get) => ({
     const socket = get().socket;
     if (!socket) return;
     socket.emit('leave-room');
-    set({ roomId: null, peers: [] });
+    set({ peers: [] });
   },
 
   toggleMute: (muted) => {

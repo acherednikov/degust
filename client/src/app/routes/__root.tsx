@@ -1,12 +1,18 @@
-import { LoginForm } from '@/features/auth/ui/AuthForm';
-import { RoomView } from '@/features/room/ui/RoomView';
-import { Button } from '@/components/shared/button';
-
-import { useAuthStore } from '@/stores/auth.store';
-import { useSignalingStore } from '@/stores/signaling.store';
+import { createRootRoute, Outlet } from '@tanstack/react-router';
+// import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { useEffect } from 'react';
 
-export default function App() {
+import { LoginForm } from '@/features/auth/ui/AuthForm';
+import { Button } from '@/components/shared/button';
+import { useAuthStore } from '@/stores/auth.store';
+import { useSignalingStore } from '@/stores/signaling.store';
+
+export const Route = createRootRoute({
+  component: RootLayout,
+  notFoundComponent: () => <p>Not Found</p>,
+});
+
+function RootLayout() {
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
   const logout = useAuthStore((s) => s.logout);
@@ -17,6 +23,7 @@ export default function App() {
     }
   }, [token]);
 
+  // Не залогинен → показываем форму логина, без Outlet
   if (!user) return <LoginForm />;
 
   return (
@@ -32,7 +39,9 @@ export default function App() {
           </Button>
         </div>
       </header>
-      <RoomView />
+
+      <Outlet />
+      {/* <TanStackRouterDevtools /> */}
     </div>
   );
 }
