@@ -40,7 +40,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         password: config.get('DB_PASSWORD', ''),
         database: config.get('DB_NAME', 'degust'),
         autoLoadEntities: true,   // подхватывает entities из forFeature
-        synchronize: config.get('NODE_ENV') !== 'production', // только для dev
+        synchronize: true,
+        // synchronize: config.get('NODE_ENV') !== 'production', // только для dev
         logging: config.get('NODE_ENV') === 'development',
         // ssl: { rejectUnauthorized: false },
       }),
