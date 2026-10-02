@@ -5,7 +5,6 @@ import { SOCKET_URL } from '@/config';
 
 export interface Peer {
   socketId: string;
-  userId: string;
   displayName: string;
   muted: boolean;
 }

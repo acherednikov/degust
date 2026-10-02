@@ -77,7 +77,8 @@ export class SignalingGateway
     try {
       const payload = await this.jwtService.verifyAsync(token);
       client.data.user = {
-        userId: payload.sub,
+        userId: payload.sub,           // UUID из БД
+        externalId: payload.externalId,
         displayName: payload.name,
       };
       this.logger.log(`Authenticated: ${payload.sub} (${client.id})`);

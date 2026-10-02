@@ -9,7 +9,6 @@ import { useAuthStore } from '@/stores/auth.store';
 export function LoginForm() {
   const login = useAuthStore((s) => s.login);
   
-  const [userId, setUserId] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -19,7 +18,7 @@ export function LoginForm() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(userId.trim(), displayName.trim());
+      await login(displayName.trim());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -35,16 +34,6 @@ export function LoginForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="userId">User ID</Label>
-              <Input
-                id="userId"
-                placeholder="alice"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                required
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="displayName">Отображаемое имя</Label>
               <Input

@@ -32,7 +32,7 @@ function RootLayout() {
         <h1 className="text-2xl font-bold">Voice Chat</h1>
         <div className="flex items-center gap-4">
           <span className="text-sm">
-            {user.displayName} ({user.userId})
+            {user.displayName}
           </span>
           <Button variant="outline" size="sm" onClick={logout}>
             Выйти

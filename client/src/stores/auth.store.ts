@@ -5,7 +5,6 @@ import { API_URL } from '../config';
 import { useSignalingStore } from './signaling.store';
 
 export interface AuthUser {
-  userId: string;
   displayName: string;
 }
 
@@ -19,7 +18,7 @@ interface JwtPayload {
 interface AuthState {
   token: string | null;
   user: AuthUser | null;
-  login: (userId: string, displayName: string) => Promise<void>;
+  login: (displayName: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -39,11 +38,11 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
 
-      login: async (userId, displayName) => {
+      login: async (displayName) => {
         const res = await fetch(`${API_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, displayName }),
+          body: JSON.stringify({ displayName }),
         });
 
         if (!res.ok) {
@@ -58,7 +57,7 @@ export const useAuthStore = create<AuthState>()(
 
         set({
           token: data.access_token,
-          user: { userId: payload.sub, displayName: payload.name },
+          user: { displayName: payload.name },
         });
 
         useSignalingStore.getState().connect(data.access_token);

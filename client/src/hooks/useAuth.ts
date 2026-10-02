@@ -4,7 +4,6 @@ import { API_URL } from '../config';
 const TOKEN_KEY = 'voice-chat.token';
 
 export interface AuthUser {
-  userId: string;
   displayName: string;
 }
 
@@ -54,15 +53,15 @@ export function useAuth() {
     }
 
     setToken(stored);
-    setUser({ userId: payload.sub, displayName: payload.name });
+    setUser({ displayName: payload.name });
     setLoading(false);
   }, []);
 
-  const login = useCallback(async (userId: string, displayName: string) => {
+  const login = useCallback(async (displayName: string) => {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, displayName }),
+      body: JSON.stringify({ displayName }),
     });
 
     if (!res.ok) {
@@ -77,7 +76,7 @@ export function useAuth() {
 
     localStorage.setItem(TOKEN_KEY, data.access_token);
     setToken(data.access_token);
-    setUser({ userId: payload.sub, displayName: payload.name });
+    setUser({ displayName: payload.name });
   }, []);
 
   const logout = useCallback(() => {
