@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/ca
 import { Spinner } from '@/components/shared/spinner';
 import { MicPermission } from '@/components/shared/MicPermission';
 import { SignalState } from '@/components/shared/SignalState';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth/model/useAuth';
 import { useRoomSession } from '@/hooks/useRoomSession';
 
 import { PeerConnectionManager } from './PeerConnectionManager';

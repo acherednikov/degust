@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore } from '@/entities/auth/model/auth.store';
 import { Room } from '@/features/room/ui/Room';
 
 export const Route = createFileRoute('/room/$roomId')({

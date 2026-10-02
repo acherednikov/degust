@@ -1,5 +1,5 @@
 import { API_URL } from '@/config';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore } from '@/entities/auth/model/auth.store';
 
 export interface RoomSummary {
   id: string;

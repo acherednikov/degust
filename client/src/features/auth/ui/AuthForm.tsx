@@ -4,19 +4,25 @@ import { Input } from '@/components/shared/input';
 import { Label } from '@/components/shared/label';
 import { Card, CardContent } from '@/components/shared/card';
 
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuth } from '@/features/auth/model/useAuth';
 
 export function LoginForm() {
-  const login = useAuthStore((s) => s.login);
+  const { login } = useAuth();
   
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplayName(e.target.value);
+  };
+
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setError(null);
     setSubmitting(true);
+
     try {
       await login(displayName.trim());
     } catch (err) {
@@ -29,9 +35,6 @@ export function LoginForm() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-sm">
-        {/* <CardHeader>
-          <CardTitle>Войти в голосовой чат</CardTitle>
-        </CardHeader> */}
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -40,7 +43,7 @@ export function LoginForm() {
                 id="displayName"
                 placeholder="Алиса"
                 value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
+                onChange={handleNameInputChange}
                 required
               />
             </div>

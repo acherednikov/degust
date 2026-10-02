@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import { LoginForm } from '@/features/auth/ui/AuthForm';
 import { Button } from '@/components/shared/button';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore } from '@/entities/auth/model/auth.store';
 import { useSignalingStore } from '@/stores/signaling.store';
 
 export const Route = createRootRoute({
