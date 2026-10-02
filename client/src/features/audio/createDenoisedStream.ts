@@ -9,37 +9,42 @@ let rnnoiseNode: RnnoiseWorkletNode | null = null;
 export async function createDenoisedStream(
   rawStream: MediaStream,
 ): Promise<MediaStream> {
-  // 1. Создаём AudioContext на 48kHz (RNNoise требует эту частоту)
+  // Создаём AudioContext на 48kHz (RNNoise требует эту частоту)
   if (!audioContext) {
     audioContext = new AudioContext({ sampleRate: 48000 });
   }
 
-  // 2. Загружаем WASM (с поддержкой SIMD, если доступно)
+  // Загружаем WASM (с поддержкой SIMD, если доступно)
   const wasmBinary = await loadRnnoise({
     url: rnnoiseWasmPath,
     simdUrl: rnnoiseSimdWasmPath,
   });
 
-  // 3. Регистрируем worklet-модуль в контексте
+  // Регистрируем worklet-модуль в контексте
   await audioContext.audioWorklet.addModule(rnnoiseWorkletPath);
 
-  // 4. Создаём source из сырого потока
+  // Создаём source из сырого потока
   const source = audioContext.createMediaStreamSource(rawStream);
 
-  // 5. Создаём RNNoise-ноду
+  // Создаём RNNoise-ноду
   rnnoiseNode = new RnnoiseWorkletNode(audioContext, {
     wasmBinary,
     maxChannels: 1, // моно для голоса
   });
 
-  // 6. Создаём destination, из которого получим очищенный MediaStream
+  // Создаём GainNode с бустом
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = 2; // 1.5 = +50% громкости
+
+  // Создаём destination, из которого получим очищенный MediaStream
   const destination = audioContext.createMediaStreamDestination();
 
-  // 7. Собираем граф: source → rnnoise → destination
+  // Собираем граф: source → rnnoise → gain → destination
   source.connect(rnnoiseNode);
-  rnnoiseNode.connect(destination);
+  rnnoiseNode.connect(gainNode);
+  gainNode.connect(destination);
 
-  // 8. Возвращаем очищенный поток
+  // Возвращаем очищенный поток
   return destination.stream;
 }
 

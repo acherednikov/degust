@@ -5,18 +5,9 @@ import { SOCKET_URL } from '@/config';
 
 export interface Peer {
   socketId: string;
+  userId: string;
   displayName: string;
   muted: boolean;
-}
-
-export interface IncomingOffer {
-  fromSocketId: string;
-  sdp: string;
-}
-
-export interface IncomingAnswer {
-  fromSocketId: string;
-  sdp: string;
 }
 
 export interface IncomingIce {
@@ -29,6 +20,8 @@ export interface IncomingIce {
 interface SignalingState {
   socket: Socket | null;
   connected: boolean;
+  roomId: string | null;
+  wasInRoom: boolean;
   selfSocketId: string | null;
   peers: Peer[];
 
@@ -46,30 +39,43 @@ interface SignalingState {
 export const useSignalingStore = create<SignalingState>((set, get) => ({
   socket: null,
   connected: false,
-  // roomId: null,
+  roomId: null,
+  wasInRoom: false,
   selfSocketId: null,
   peers: [],
 
-  connect: (token: string) => {
-    // Уже есть живой сокет — не трогаем
+  connect: (token) => {
     if (get().socket) return;
-
     if (!token) {
       console.warn('No token, cannot connect');
       return;
     }
 
-    const socket = io(SOCKET_URL, {
-      auth: { token },
-      // transports: ['websocket'],
-    });
+    const socket = io(SOCKET_URL, { auth: { token } });
 
     socket.on('connect', () => {
       set({ connected: true, selfSocketId: socket.id ?? null });
+
+      // Reconnect: если были в комнате — возвращаемся
+      const { wasInRoom, roomId } = get();
+      if (wasInRoom && roomId) {
+        console.log('[signaling] reconnected, rejoining room', roomId);
+        socket.emit('join-room', { roomId });
+      }
     });
 
-    socket.on('disconnect', () => {
-      set({ connected: false, peers: [], selfSocketId: null });
+    socket.on('disconnect', (reason) => {
+      console.log('[signaling] disconnected:', reason);
+      // НЕ сбрасываем roomId/peers/wasInRoom — нужны для восстановления
+      set({ connected: false, selfSocketId: null });
+    });
+
+    socket.io.on('reconnect_attempt', (attempt) => {
+      console.log('[signaling] reconnect attempt', attempt);
+    });
+
+    socket.io.on('reconnect_failed', () => {
+      console.error('[signaling] reconnect failed');
     });
 
     socket.on('room-joined', ({ selfSocketId, peers }) => {
@@ -78,7 +84,12 @@ export const useSignalingStore = create<SignalingState>((set, get) => ({
 
     socket.on('peer-joined', (peer: Peer) => {
       set((state) => ({
-        peers: [...state.peers.filter((p) => p.socketId !== peer.socketId), peer],
+        peers: [
+          ...state.peers.filter(
+            (p) => p.socketId !== peer.socketId && p.userId !== peer.userId,
+          ),
+          peer,
+        ],
       }));
     });
 
@@ -104,31 +115,32 @@ export const useSignalingStore = create<SignalingState>((set, get) => ({
   },
 
   disconnect: () => {
-    const socket = get().socket;
-    if (socket) {
-      socket.disconnect();
-    }
-    set({ socket: null, connected: false, peers: [], selfSocketId: null });
+    get().socket?.disconnect();
+    set({
+      socket: null,
+      connected: false,
+      roomId: null,
+      wasInRoom: false,
+      peers: [],
+      selfSocketId: null,
+    });
   },
 
   joinRoom: (roomId) => {
     const socket = get().socket;
-    console.log('[joinRoom] called. roomId:', roomId, 'socket:', socket?.id, 'connected:', socket?.connected);
     if (!socket) return;
+    set({ roomId, wasInRoom: true });
     socket.emit('join-room', { roomId });
   },
 
   leaveRoom: () => {
     const socket = get().socket;
-    if (!socket) return;
-    socket.emit('leave-room');
-    set({ peers: [] });
+    if (socket) socket.emit('leave-room');
+    set({ roomId: null, wasInRoom: false, peers: [] });
   },
 
   toggleMute: (muted) => {
-    const socket = get().socket;
-    if (!socket) return;
-    socket.emit('toggle-mute', { muted });
+    get().socket?.emit('toggle-mute', { muted });
   },
 
   sendOffer: (targetSocketId, sdp) => {

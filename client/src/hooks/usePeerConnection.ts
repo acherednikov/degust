@@ -35,6 +35,10 @@ export function usePeerConnection(peer: Peer) {
 
   useEffect(() => {
     if (!socket || !selfSocketId) return;
+    if (!socket.connected) {
+      console.log('[pc] skipping creation, socket not connected');
+      return;
+    }
 
     const isInitiator = selfSocketId < peer.socketId;
     isInitiatorRef.current = isInitiator;

@@ -18,12 +18,25 @@ export function PeerConnection({ peer }: Props) {
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !remoteStream) return;
-    audio.srcObject = remoteStream;
-    audio.play().catch((err) => {
-      console.warn('[audio] autoplay blocked', err);
-    });
+    if (!audio) return;
+
+    if (remoteStream) {
+      audio.srcObject = remoteStream;
+      audio.play().catch((err) => console.warn('[audio] play failed', err));
+    } else {
+      // стрим пропал (cleanup pc) — отвязываем от audio
+      audio.srcObject = null;
+    }
   }, [remoteStream]);
+
+  useEffect(() => {
+    // на размонтировании отписываем audio
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.srcObject = null;
+      }
+    };
+  }, []);
 
   return (
     <>

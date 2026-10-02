@@ -123,18 +123,24 @@ export class SignalingGateway
     const user = client.data.user;
     if (!user) throw new WsException('Unauthorized');
 
-    // 1. Сначала выкидываем из старой комнаты, если сидит
+    // Убираем «призраков» с этим же userId (реконнект)
+    const stale = this.signaling.removePeersByUserId(dto.roomId, user.userId);
+    for (const peer of stale) {
+      this.logger.log(`Removed stale peer ${peer.socketId} (user ${peer.userId})`);
+      this.server.to(dto.roomId).emit('peer-left', { socketId: peer.socketId });
+    }
+
+    // Убираем сам сокет из старой комнаты (если он там был под старым socketId)
     const existingRoom = this.signaling.findRoomBySocket(client.id);
     if (existingRoom) {
       this.leaveRoom(client, existingRoom);
     }
 
-    // 2. Теперь создаём/находим комнату в БД
+    // Создаём/находим комнату в БД
     const room = await this.rooms.findOrCreateForUser(dto.roomId, user.userId);
-
-    // 3. Ключ комнаты — room.name (он же dto.roomId, но берём из БД для консистентности)
     const roomKey = room.name;
 
+    // Добавляем в Socket.IO и SignalingService
     const peer: Peer = {
       socketId: client.id,
       userId: user.userId,
@@ -146,7 +152,7 @@ export class SignalingGateway
     client.join(roomKey);
     this.signaling.addPeer(roomKey, peer);
 
-    // 4. Список уже присутствующих (без себя)
+    // Отправляем новому список присутствующих
     const existingPeers = this.signaling
       .getPeers(roomKey)
       .filter((p) => p.socketId !== client.id);
@@ -157,6 +163,7 @@ export class SignalingGateway
       peers: existingPeers,
     });
 
+    // Уведомляем остальных в комнате
     client.to(roomKey).emit('peer-joined', peer);
 
     this.logger.log(

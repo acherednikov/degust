@@ -66,6 +66,31 @@ export class SignalingService {
     return peer;
   }
 
+  /**
+ * Удаляет всех пиров с данным userId из комнаты.
+ * Используется при реконнекте: старый socketId уже мёртв,
+ * но сервер ещё не получил handleDisconnect (ждёт pingTimeout).
+ */
+  removePeersByUserId(roomId: string, userId: string): Peer[] {
+    const room = this.rooms.get(roomId);
+    if (!room) return [];
+
+    const removed: Peer[] = [];
+    for (const [socketId, peer] of room) {
+      if (peer.userId === userId) {
+        removed.push(peer);
+        room.delete(socketId);
+      }
+    }
+
+    if (room.size === 0) {
+      this.rooms.delete(roomId);
+      this.logger.log(`Room removed (empty after cleanup): ${roomId}`);
+    }
+
+    return removed;
+  }
+
   // ─────────────────────────────────────────────────────────────
   // Queries
   // ─────────────────────────────────────────────────────────────

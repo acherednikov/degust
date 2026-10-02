@@ -1,4 +1,4 @@
-import { createDenoisedStream } from '@/features/audio/rnnoise';
+import { createDenoisedStream } from '@/features/audio/createDenoisedStream';
 import { create } from 'zustand';
 
 interface LocalMediaState {
