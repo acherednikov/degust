@@ -1,8 +1,10 @@
+import { createDenoisedStream } from '@/features/audio/rnnoise';
 import { create } from 'zustand';
 
 interface LocalMediaState {
   stream: MediaStream | null;
   audioTrack: MediaStreamTrack | null;
+  
   enabled: boolean;      // микрофон включён (не muted)
   permission: 'unknown' | 'granted' | 'denied' | 'error';
   error: string | null;
@@ -30,26 +32,30 @@ export const useLocalMediaStore = create<LocalMediaState>((set, get) => ({
     set({ requesting: true, error: null });
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const rawStream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
+          echoCancellation: true,      // AEC оставляем
+          noiseSuppression: false,     // ← ВЫКЛЮЧАЕМ, иначе двойное подавление
+          autoGainControl: false,
         },
         video: false,
       });
 
-      const audioTrack = stream.getAudioTracks()[0] ?? null;
+      // 2. Пропускаем через RNNoise
+      const denoisedStream = await createDenoisedStream(rawStream);
+
+      const audioTrack = denoisedStream.getAudioTracks()[0] ?? null;
+      // const settings = audioTrack.getSettings();
 
       set({
-        stream,
+        stream: denoisedStream,
         audioTrack,
         enabled: audioTrack?.enabled ?? false,
         permission: 'granted',
         requesting: false,
       });
 
-      return stream;
+      return denoisedStream;
     } catch (err) {
       const message =
         err instanceof DOMException && err.name === 'NotAllowedError'

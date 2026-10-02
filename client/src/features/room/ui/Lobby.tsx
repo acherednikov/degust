@@ -6,10 +6,14 @@ import { useRooms } from '@/features/room/api/useRooms';
 import { Button } from '@/components/shared/button';
 import { Input } from '@/components/shared/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
+import { SignalState } from '@/components/shared/SignalState';
 
 export function Lobby() {
   const navigate = useNavigate();
+  
   const connected = useSignalingStore((s) => s.connected);
+  const selfSocketId = useSignalingStore((s) => s.selfSocketId);
+
   const { data: rooms, isLoading, error } = useRooms();
 
   const [roomId, setRoomId] = useState('');
@@ -27,8 +31,11 @@ export function Lobby() {
 
   return (
     <div className="space-y-4">
+      <SignalState connected={connected} selfSocketId={selfSocketId} />
       <Card>
-        <CardHeader><CardTitle>Новая комната</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Новая комната</CardTitle>
+        </CardHeader>
         <CardContent>
           <form onSubmit={handleJoin} className="space-y-2">
             <Input

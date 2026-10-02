@@ -4,18 +4,20 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { useSignalingStore } from '@/stores/signaling.store';
 import { Button } from '@/components/shared/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
+import { Spinner } from '@/components/shared/spinner';
 import { MicPermission } from '@/components/shared/MicPermission';
+import { SignalState } from '@/components/shared/SignalState';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoomSession } from '@/hooks/useRoomSession';
 
 import { PeerConnectionManager } from './PeerConnectionManager';
 import { useInvalidateRooms } from '../api/useRooms';
-import { Spinner } from '@/components/shared/spinner';
 
 export function Room() {
-  const { roomId } = useParams({ from: '/room/$roomId' });
   const navigate = useNavigate();
+
   const { user } = useAuth();
+  const { roomId } = useParams({ from: '/room/$roomId' });
   const connected = useSignalingStore((s) => s.connected);
   const joinRoom = useSignalingStore((s) => s.joinRoom);
   const leaveRoom = useSignalingStore((s) => s.leaveRoom);
@@ -48,12 +50,7 @@ export function Room() {
 
   return (
     <div className="p-6 space-y-4">
-      <div className="flex items-center gap-4">
-        <span className={connected ? 'text-green-600' : 'text-red-600'}>
-          ● {connected ? 'Connected' : 'Disconnected'}
-        </span>
-        {selfSocketId && <span className="text-xs text-gray-500">you: {selfSocketId}</span>}
-      </div>
+      <SignalState connected={connected} selfSocketId={selfSocketId} />
 
       <div className="flex items-center gap-2">
         <span>Комната: <b>{roomId}</b></span>
