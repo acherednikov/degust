@@ -6,12 +6,15 @@ import { useLocalMediaStore } from '@/stores/local-media.store';
 
 export function useRoomSession() {
   const { roomId } = useParams({ from: '/room/$roomId' });
-  const connected = useSignalingStore((s) => s.connected);
 
   const stream = useLocalMediaStore((s) => s.stream);
   const permission = useLocalMediaStore((s) => s.permission);
   const requesting = useLocalMediaStore((s) => s.requesting);
+  const enabled = useLocalMediaStore((s) => s.enabled);
   const requestMedia = useLocalMediaStore((s) => s.requestMedia);
+
+  const connected = useSignalingStore((s) => s.connected);
+  const toggleMute = useSignalingStore((s) => s.toggleMute);
 
   // Защита от повторного запроса на каждый ре-рендер
   const requestedRef = useRef(false);
@@ -40,8 +43,12 @@ export function useRoomSession() {
 
     requestedRef.current = true;
 
-    requestMedia().catch((err) => {
-      console.warn('[session] requestMedia failed', err);
-    });
-  }, [roomId, connected, stream, permission, requesting, requestMedia]);
+    requestMedia()
+      .catch((err) => {
+        console.warn('[session] requestMedia failed', err);
+      })
+      .finally(() => {
+        toggleMute(!enabled);
+      });
+  }, [roomId, connected, stream, permission, requesting, enabled, requestMedia, toggleMute]);
 }

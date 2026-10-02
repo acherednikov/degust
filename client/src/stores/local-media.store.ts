@@ -1,6 +1,8 @@
 import { createDenoisedStream } from '@/features/audio/createDenoisedStream';
 import { create } from 'zustand';
 
+import { useSignalingStore } from './signaling.store';
+
 interface LocalMediaState {
   stream: MediaStream | null;
   audioTrack: MediaStreamTrack | null;
@@ -79,6 +81,8 @@ export const useLocalMediaStore = create<LocalMediaState>((set, get) => ({
     if (!track) return;
     track.enabled = enabled;
     set({ enabled });
+
+    useSignalingStore.getState().toggleMute(!enabled);
   },
 
   stop: () => {
