@@ -130,7 +130,7 @@ export class SignalingGateway
     }
 
     // 2. Теперь создаём/находим комнату в БД
-    const room = await this.rooms.findOrCreate(dto.roomId);
+    const room = await this.rooms.findOrCreateForUser(dto.roomId, user.userId);
 
     // 3. Ключ комнаты — room.name (он же dto.roomId, но берём из БД для консистентности)
     const roomKey = room.name;

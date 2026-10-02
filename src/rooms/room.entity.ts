@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
 } from 'typeorm';
+
+import { User } from '../users/user.entity.js';
 
 @Entity()
 export class Room {
@@ -13,6 +16,9 @@ export class Room {
 
   @Column({ unique: true })
   name: string;
+
+  @ManyToMany(() => User, (user) => user.rooms)
+  users: User[];
 
   @CreateDateColumn()
   createdAt: Date;
