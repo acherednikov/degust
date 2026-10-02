@@ -7,13 +7,11 @@ import { StringValue } from 'ms';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 
-// import { User } from '../users/user.entity.js';
 import { UsersModule } from '../users/user.module.js';
 
 @Module({
   imports: [
     JwtModule.registerAsync({
-      // imports: [ConfigModule, TypeOrmModule.forFeature([User])],
       imports: [ConfigModule, UsersModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

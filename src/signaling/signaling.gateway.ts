@@ -24,8 +24,10 @@ import { OfferDto } from './dto/offer.dto.js';
 import { AnswerDto } from './dto/answer.dto.js';
 import { IceCandidateDto } from './dto/ice-candidate.dto.js';
 import { type Peer, SignalingService } from './signaling.service.js';
+
 import { WsAuthGuard } from '../auth/ws-auth.guard.js';
 import { WsExceptionFilter } from '../common/filters/ws-exception.filter.js';
+import { RoomsRepository } from '../rooms/rooms.repository.js';
 
 @UseFilters(new WsExceptionFilter())
 @UseGuards(WsAuthGuard)
@@ -53,6 +55,7 @@ export class SignalingGateway
   constructor(
     private readonly signaling: SignalingService,
     private readonly jwtService: JwtService,
+    private readonly rooms: RoomsRepository,
   ) {}
 
   // ─────────────────────────────────────────────────────────────
@@ -113,18 +116,24 @@ export class SignalingGateway
   // ─────────────────────────────────────────────────────────────
 
   @SubscribeMessage('join-room')
-  handleJoinRoom(
+  async handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: JoinRoomDto,
   ) {
-    const user = client.data.user; // ← из JWT, не из DTO
+    const user = client.data.user;
     if (!user) throw new WsException('Unauthorized');
 
-    // На всякий случай: если сокет уже сидит в какой-то комнате — выкидываем
+    // 1. Сначала выкидываем из старой комнаты, если сидит
     const existingRoom = this.signaling.findRoomBySocket(client.id);
     if (existingRoom) {
       this.leaveRoom(client, existingRoom);
     }
+
+    // 2. Теперь создаём/находим комнату в БД
+    const room = await this.rooms.findOrCreate(dto.roomId);
+
+    // 3. Ключ комнаты — room.name (он же dto.roomId, но берём из БД для консистентности)
+    const roomKey = room.name;
 
     const peer: Peer = {
       socketId: client.id,
@@ -134,25 +143,24 @@ export class SignalingGateway
       joinedAt: Date.now(),
     };
 
-    client.join(dto.roomId);
-    this.signaling.addPeer(dto.roomId, peer);
+    client.join(roomKey);
+    this.signaling.addPeer(roomKey, peer);
 
+    // 4. Список уже присутствующих (без себя)
     const existingPeers = this.signaling
-      .getPeers(dto.roomId)
+      .getPeers(roomKey)
       .filter((p) => p.socketId !== client.id);
 
-    // Новому — список уже присутствующих, чтобы он знал, с кем инициировать
     client.emit('room-joined', {
-      roomId: dto.roomId,
+      roomId: roomKey,
       selfSocketId: client.id,
       peers: existingPeers,
     });
 
-    // Остальным — что пришёл новый участник
-    client.to(dto.roomId).emit('peer-joined', peer);
+    client.to(roomKey).emit('peer-joined', peer);
 
     this.logger.log(
-      `User ${user.userId} joined room ${dto.roomId} (socket: ${client.id})`,
+      `User ${user.userId} joined room ${roomKey} (socket: ${client.id})`,
     );
   }
 
