@@ -5,6 +5,7 @@ import { usePeerConnection } from '@/hooks/usePeerConnection';
 import { usePeerAudioLevel } from '@/hooks/usePeerAudioLevel';
 
 import { PeerItem } from './PeerItem';
+import { usePeerConnectionQuality } from '../hooks/usePeerConnectionQuality';
 
 interface Props {
   peer: Peer;
@@ -12,9 +13,10 @@ interface Props {
 
 export function PeerConnection({ peer }: Props) {
   const { remoteStream, pc } = usePeerConnection(peer);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
   const { level, isSpeaking } = usePeerAudioLevel(pc, false, { threshold: 0.05 });
+  const { quality } = usePeerConnectionQuality(pc);
+
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -41,7 +43,7 @@ export function PeerConnection({ peer }: Props) {
   return (
     <>
       <audio ref={audioRef} autoPlay />
-      <PeerItem peer={peer} isSpeaking={isSpeaking} level={level} />
+      <PeerItem peer={peer} isSpeaking={isSpeaking} level={level} quality={quality} />
       {/* для отладки: */}
       {/* <span className="text-xs">{peer.displayName}: {connectionState}</span> */}
     </>

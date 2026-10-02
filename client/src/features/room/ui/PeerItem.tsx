@@ -1,18 +1,23 @@
 import { type Peer } from '@/stores/signaling.store';
 
+import { ConnectionQualityIndicator } from './ConnectionQualityIndicator';
+import type { ConnectionQuality } from '../hooks/usePeerConnectionQuality';
+
 interface Props {
   peer: Pick<Peer, 'displayName' | 'muted'>;
   isSpeaking: boolean;
   level: number;
+  quality: ConnectionQuality;
 }
 
-export function PeerItem({ peer, isSpeaking, level }: Props) {
+export function PeerItem({ peer, isSpeaking, level, quality }: Props) {
   return (
     <div
-      className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
+      className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
         isSpeaking ? 'bg-green-500/15 ring-1 ring-green-500/40' : ''
       }`}
     >
+      <ConnectionQualityIndicator quality={quality} />
       <span className="text-sm font-medium">{peer.displayName}</span>
       {peer.muted && <span className="text-xs text-gray-400">🔇</span>}
       <SignalBars level={level} />
