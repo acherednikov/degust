@@ -1,12 +1,16 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
+
 import { useSignalingStore } from '@/stores/signaling.store';
 import { Button } from '@/components/shared/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
 import { MicPermission } from '@/components/shared/MicPermission';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoomSession } from '@/hooks/useRoomSession';
+
 import { PeerConnectionManager } from './PeerConnectionManager';
+import { useInvalidateRooms } from '../api/useRooms';
+import { Spinner } from '@/components/shared/spinner';
 
 export function Room() {
   const { roomId } = useParams({ from: '/room/$roomId' });
@@ -19,6 +23,7 @@ export function Room() {
   const selfSocketId = useSignalingStore((s) => s.selfSocketId);
 
   useRoomSession();
+  const invalidateRooms = useInvalidateRooms();
 
   // URL — единственный источник правды для roomId
   useEffect(() => {
@@ -28,8 +33,18 @@ export function Room() {
   }, [connected, roomId, joinRoom, leaveRoom]);
 
   const handleLeave = () => {
+    invalidateRooms();
     navigate({ to: '/' });  // без `from`, чтобы не привязываться к размонтируемому роуту
   };
+
+  if (!connected) {
+    return (
+      <div className="p-6 justify-center items-center flex flex-col gap-y-2">
+        <p className="text-sm text-gray-500">Подключение к серверу...</p>
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-4">

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { StringValue } from 'ms';
 
 import { AuthController } from './auth.controller.js';
@@ -12,7 +11,7 @@ import { UsersModule } from '../users/user.module.js';
 @Module({
   imports: [
     JwtModule.registerAsync({
-      imports: [ConfigModule, UsersModule],
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
@@ -21,9 +20,11 @@ import { UsersModule } from '../users/user.module.js';
         },
       }),
     }),
+    UsersModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],
   exports: [JwtModule],
 })
+
 export class AuthModule {}

@@ -8,6 +8,7 @@ import { AppService } from './app.service.js';
 
 import { AuthModule } from './auth/auth.module.js';
 import { SignalingModule } from './signaling/signaling.module.js';
+import { RoomsModule } from './rooms/rooms.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -19,6 +20,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     }),
     AuthModule,
     SignalingModule,
+    RoomsModule,
     // Distributed tracing, auto-correlated logs, request/job metrics, error
     // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
     ObserveModule.forRoot({
@@ -40,6 +42,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         autoLoadEntities: true,   // подхватывает entities из forFeature
         synchronize: config.get('NODE_ENV') !== 'production', // только для dev
         logging: config.get('NODE_ENV') === 'development',
+        // ssl: { rejectUnauthorized: false },
       }),
     }),
 

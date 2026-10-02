@@ -2,7 +2,7 @@ import { type SubmitEvent, useState } from 'react';
 import { Button } from '@/components/shared/button';
 import { Input } from '@/components/shared/input';
 import { Label } from '@/components/shared/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
+import { Card, CardContent } from '@/components/shared/card';
 
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -29,9 +29,9 @@ export function LoginForm() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-sm">
-        <CardHeader>
+        {/* <CardHeader>
           <CardTitle>Войти в голосовой чат</CardTitle>
-        </CardHeader>
+        </CardHeader> */}
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
