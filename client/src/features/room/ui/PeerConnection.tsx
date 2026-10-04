@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import { type Peer } from '@/stores/signaling.store';
+import { usePeerVolumesStore } from '@/stores/peer-volumes.store';
 import { usePeerConnection } from '@/hooks/usePeerConnection';
 import { usePeerAudioLevel } from '@/hooks/usePeerAudioLevel';
 
@@ -14,6 +15,7 @@ interface Props {
 export function PeerConnection({ peer }: Props) {
   const { remoteStream, pc } = usePeerConnection(peer);
   const { level, isSpeaking } = usePeerAudioLevel(pc, false, { threshold: 0.05 });
+  const volume = usePeerVolumesStore((s) => s.volumes[peer.userId]);
   const { quality } = usePeerConnectionQuality(pc);
 
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -21,6 +23,10 @@ export function PeerConnection({ peer }: Props) {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+
+    if (volume) {
+      audio.volume = volume;
+    }
 
     if (remoteStream) {
       audio.srcObject = remoteStream;

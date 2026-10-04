@@ -2,9 +2,10 @@ import { type Peer } from '@/stores/signaling.store';
 
 import { ConnectionQualityIndicator } from './ConnectionQualityIndicator';
 import type { ConnectionQuality } from '../hooks/usePeerConnectionQuality';
+import { PeerVolumeSlider } from './PeerVolumeSlider';
 
 interface Props {
-  peer: Pick<Peer, 'displayName' | 'muted'>;
+  peer: Peer;
   isSpeaking: boolean;
   level: number;
   quality: ConnectionQuality;
@@ -20,6 +21,7 @@ export function PeerItem({ peer, isSpeaking, level, quality }: Props) {
       <ConnectionQualityIndicator quality={quality} />
       <span className="text-sm font-medium">{peer.displayName}</span>
       {peer.muted && <span className="text-xs text-gray-400">🔇</span>}
+      <PeerVolumeSlider userId={peer.userId} />
       <SignalBars level={level} />
     </div>
   );
