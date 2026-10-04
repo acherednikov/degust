@@ -5,6 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 import { User } from '../users/user.entity.js';
@@ -16,6 +18,13 @@ export class Room {
 
   @Column({ unique: true })
   name: string;
+
+  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'createdById' })
+  createdBy: User | null;
+
+  @Column({ nullable: true })
+  createdById: string | null;
 
   @ManyToMany(() => User, (user) => user.rooms)
   users: User[];

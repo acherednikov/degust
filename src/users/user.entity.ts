@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 
 import { Room } from '../rooms/room.entity.js';
@@ -17,6 +18,9 @@ export class User {
 
   @Column({ unique: true })
   displayName: string;
+
+  @OneToMany(() => Room, (room) => room.createdBy)
+  createdRooms: Room[];
 
   @ManyToMany(() => Room, (room) => room.users)
   @JoinTable()

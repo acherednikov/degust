@@ -33,7 +33,11 @@ export class RoomsRepository {
     });
 
     if (!room) {
-      room = this.repo.create({ name, users: [] });
+      room = this.repo.create({
+        name,
+        createdById: userId,
+        users: [],
+      });
       room = await this.repo.save(room);
     }
 
