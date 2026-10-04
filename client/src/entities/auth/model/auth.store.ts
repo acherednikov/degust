@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-import type { AuthUser } from './types';
+import type { LoginResponse, User } from './types';
 
 interface AuthState {
   token: string | null;
-  user: AuthUser | null;
+  user: User | null;
 
-  login: (displayName: string, token: string) => Promise<void>;
+  login: (data: LoginResponse) => Promise<void>;
   logout: () => void;
 }
 
@@ -17,10 +17,10 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
 
-      login: async (displayName: string, token: string) => {
+      login: async (data: LoginResponse) => {
         set({
-          token,
-          user: { displayName },
+          token: data.access_token,
+          user: data.user,
         });
         // useSignalingStore.getState().connect(token);
       },

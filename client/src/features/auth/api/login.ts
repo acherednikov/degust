@@ -1,10 +1,10 @@
 import { API_URL } from "@/config";
 
-import type { JwtPayload } from "@/entities/auth/model/types";
-import type { LoginResponse } from "./dto";
+import type { LoginResponse } from "@/entities/auth/model/types";
+
 import { decodeJwt } from "../lib/decodeJwt";
 
-export const login = async (displayName: string): Promise<{ data: LoginResponse, jwtPayload: JwtPayload }> => {
+export const login = async (displayName: string): Promise<LoginResponse> => {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -17,12 +17,10 @@ export const login = async (displayName: string): Promise<{ data: LoginResponse,
   }
 
   const data: LoginResponse = await res.json();
+  console.log('> ! data !', data);
   const payload = decodeJwt(data.access_token);
 
   if (!payload) throw new Error('Invalid token received');
 
-  return {
-    data,
-    jwtPayload: payload,
-  }
+  return data;
 }

@@ -4,8 +4,8 @@ import { useEffect } from 'react';
 
 import { LoginForm } from '@/features/auth/ui/AuthForm';
 import { Button } from '@/components/shared/button';
-import { useAuthStore } from '@/entities/auth/model/auth.store';
 import { useSignalingStore } from '@/stores/signaling.store';
+import { useAuth } from '@/features/auth/model/useAuth';
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -13,9 +13,7 @@ export const Route = createRootRoute({
 });
 
 function RootLayout() {
-  const user = useAuthStore((s) => s.user);
-  const token = useAuthStore((s) => s.token);
-  const logout = useAuthStore((s) => s.logout);
+  const { user, token, logout } = useAuth();
 
   useEffect(() => {
     if (token && !useSignalingStore.getState().socket) {

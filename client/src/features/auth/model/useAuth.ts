@@ -20,7 +20,7 @@ export function useAuth() {
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
 
-    if (!storedToken) {
+    if (!storedToken || !user) {
       return;
     }
 
@@ -30,17 +30,19 @@ export function useAuth() {
       return;
     }
 
-    storeLogin(payload.name, storedToken);
+    // storeLogin(user, storedToken);
+    storeLogin({ user, access_token: storedToken });
     connect(storedToken);
   }, []);
 
   const login = useCallback(async (displayName: string) => {
     try {
-      const { data } = await loginRequest(displayName);
+      const data = await loginRequest(displayName);
 
       localStorage.setItem(TOKEN_KEY, data.access_token);
 
-      storeLogin(displayName, data.access_token);
+      // storeLogin(displayName, data.access_token);
+      storeLogin(data);
       connect(data.access_token);
     } catch (error) {
       console.error(error);

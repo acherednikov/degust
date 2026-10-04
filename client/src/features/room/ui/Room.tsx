@@ -9,20 +9,29 @@ import { MicPermission } from '@/components/shared/MicPermission';
 import { SignalState } from '@/components/shared/SignalState';
 import { useAuth } from '@/features/auth/model/useAuth';
 import { useRoomSession } from '@/hooks/useRoomSession';
+import { useLocalMediaStore } from '@/stores/local-media.store';
+import { useLocalAudioLevel } from '@/hooks/useLocalAudioLevel';
 
 import { PeerConnectionManager } from './PeerConnectionManager';
 import { useInvalidateRooms } from '../api/useRooms';
+import { PeerItem } from './PeerItem';
 
 export function Room() {
   const navigate = useNavigate();
 
   const { user } = useAuth();
   const { roomId } = useParams({ from: '/room/$roomId' });
+
   const connected = useSignalingStore((s) => s.connected);
   const joinRoom = useSignalingStore((s) => s.joinRoom);
   const leaveRoom = useSignalingStore((s) => s.leaveRoom);
   const peers = useSignalingStore((s) => s.peers);
   const selfSocketId = useSignalingStore((s) => s.selfSocketId);
+
+  // внутри компонента:
+  const localStream = useLocalMediaStore((s) => s.stream);
+  const enabled = useLocalMediaStore((s) => s.enabled);
+  const { level: selfLevel, isSpeaking: selfSpeaking } = useLocalAudioLevel(localStream);
 
   useRoomSession();
   const invalidateRooms = useInvalidateRooms();
@@ -61,6 +70,19 @@ export function Room() {
 
       <div className="space-y-4">
         <MicPermission />
+        {user && (
+          <PeerItem
+            isSelf
+            peer={{
+              userId: user.id,
+              displayName: user.displayName,
+              muted: !enabled,
+            }}
+            isSpeaking={selfSpeaking}
+            level={selfLevel}
+            quality="excellent"
+          />
+        )}
         <PeerConnectionManager />
       </div>
 

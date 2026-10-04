@@ -17,6 +17,7 @@ interface Props {
   isSpeaking: boolean;
   level: number;
   quality: ConnectionQuality;
+  isSelf?: boolean;
 }
 
 const QUALITY_LABEL: Record<ConnectionQuality, string> = {
@@ -33,15 +34,17 @@ const QUALITY_LABEL: Record<ConnectionQuality, string> = {
 //   return 'Громкий голос';
 // };
 
-export function PeerItem({ peer, isSpeaking, level, quality }: Props) {
+export function PeerItem({ peer, isSpeaking, level, quality, isSelf = false }: Props) {
   return (
     <Item
       variant={isSpeaking ? 'muted' : 'default'}
-      className={`border border-gray-300 rounded-lg
+      className={`
+        border border-gray-300 rounded-lg
         ${isSpeaking
           ? 'ring-1 ring-green-500/40 bg-green-500/10 transition-colors'
-          : 'transition-colors'}`
-      }
+          : 'transition-colors'}
+        ${isSelf ? 'bg-gray-100' : ''}
+      `}
     >
       <ItemMedia variant="image" className="flex align-center">
         <SignalBars level={level} />
@@ -50,19 +53,20 @@ export function PeerItem({ peer, isSpeaking, level, quality }: Props) {
       <ItemContent>
         <ItemTitle>
           {peer.displayName}
+          {isSelf && <span className="text-xs text-gray-400">(вы)</span>}
           {peer.muted && <span className="text-xs text-gray-400">🔇</span>}
         </ItemTitle>
-        <ItemDescription>
+        {!isSelf && <ItemDescription>
           <div className="flex items-center gap-1">
             <ConnectionQualityIndicator quality={quality} />
             <p>{QUALITY_LABEL[quality]}</p>
           </div>
-        </ItemDescription>
+        </ItemDescription>}
       </ItemContent>
 
-      <ItemActions>
+      {!isSelf && <ItemActions>
         <PeerVolumeSlider userId={peer.userId} />
-      </ItemActions>
+      </ItemActions>}
     </Item>
   );
 }
