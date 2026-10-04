@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
+import { toast } from 'sonner';
 
 import { SOCKET_URL } from '@/config';
 
@@ -83,6 +84,7 @@ export const useSignalingStore = create<SignalingState>((set, get) => ({
     });
 
     socket.on('peer-joined', (peer: Peer) => {
+      toast.info(`${peer.displayName} присоединился`);
       set((state) => ({
         peers: [
           ...state.peers.filter(
@@ -94,12 +96,20 @@ export const useSignalingStore = create<SignalingState>((set, get) => ({
     });
 
     socket.on('peer-left', ({ socketId }) => {
+      const peer = get().peers.find((p) => p.socketId === socketId);
+      if (peer) {
+        toast(`${peer.displayName} покинул комнату`);
+      }
       set((state) => ({
         peers: state.peers.filter((p) => p.socketId !== socketId),
       }));
     });
 
     socket.on('peer-muted', ({ socketId, muted }) => {
+      const peer = get().peers.find((p) => p.socketId === socketId);
+      if (peer) {
+        toast(`${peer.displayName} ${muted ? 'установил' : 'снял'} мут`);
+      }
       set((state) => ({
         peers: state.peers.map((p) =>
           p.socketId === socketId ? { ...p, muted } : p,
