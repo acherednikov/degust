@@ -19,14 +19,18 @@ export function PeerConnection({ peer }: Props) {
   const { quality } = usePeerConnectionQuality(pc);
 
   const audioRef = useRef<HTMLAudioElement>(null);
+  console.log('+> peer conn . vol', volume)
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    
+    audio.volume = volume;
+  }, [volume]);
 
-    if (volume) {
-      audio.volume = volume;
-    }
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
     if (remoteStream) {
       audio.srcObject = remoteStream;

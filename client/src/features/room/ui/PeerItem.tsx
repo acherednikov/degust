@@ -1,50 +1,68 @@
-import { type Peer } from '@/stores/signaling.store';
-
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from '@/components/ui/item';
 import { ConnectionQualityIndicator } from './ConnectionQualityIndicator';
-import type { ConnectionQuality } from '../hooks/usePeerConnectionQuality';
 import { PeerVolumeSlider } from './PeerVolumeSlider';
+import { SignalBars } from './SignalBars';
+import type { Peer } from '@/stores/signaling.store';
+import type { ConnectionQuality } from '../hooks/usePeerConnectionQuality';
 
 interface Props {
-  peer: Peer;
+  peer: Pick<Peer, 'userId' | 'displayName' | 'muted'>;
   isSpeaking: boolean;
   level: number;
   quality: ConnectionQuality;
 }
 
+const QUALITY_LABEL: Record<ConnectionQuality, string> = {
+  excellent: 'Отличное соединение',
+  good: 'Хорошее соединение',
+  fair: 'Среднее соединение',
+  poor: 'Плохое соединение',
+};
+
+// const LEVEL_LABEL = (level: number) => {
+//   if (level < 0.02) return 'Тишина';
+//   if (level < 0.1) return 'Тихий голос';
+//   if (level < 0.3) return 'Обычный голос';
+//   return 'Громкий голос';
+// };
+
 export function PeerItem({ peer, isSpeaking, level, quality }: Props) {
   return (
-    <div
-      className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
-        isSpeaking ? 'bg-green-500/15 ring-1 ring-green-500/40' : ''
-      }`}
+    <Item
+      variant={isSpeaking ? 'muted' : 'default'}
+      className={`border border-gray-300 rounded-lg
+        ${isSpeaking
+          ? 'ring-1 ring-green-500/40 bg-green-500/10 transition-colors'
+          : 'transition-colors'}`
+      }
     >
-      <ConnectionQualityIndicator quality={quality} />
-      <span className="text-sm font-medium">{peer.displayName}</span>
-      {peer.muted && <span className="text-xs text-gray-400">🔇</span>}
-      <PeerVolumeSlider userId={peer.userId} />
-      <SignalBars level={level} />
-    </div>
-  );
-}
+      <ItemMedia variant="image" className="flex align-center">
+        <SignalBars level={level} />
+      </ItemMedia>
 
-function SignalBars({ level }: { level: number }) {
-  const bars =
-    level < 0.02 ? 0 :
-    level < 0.1  ? 1 :
-    level < 0.25 ? 2 :
-    level < 0.5  ? 3 : 4;
+      <ItemContent>
+        <ItemTitle>
+          {peer.displayName}
+          {peer.muted && <span className="text-xs text-gray-400">🔇</span>}
+        </ItemTitle>
+        <ItemDescription>
+          <div className="flex items-center gap-1">
+            <ConnectionQualityIndicator quality={quality} />
+            <p>{QUALITY_LABEL[quality]}</p>
+          </div>
+        </ItemDescription>
+      </ItemContent>
 
-  return (
-    <div className="flex items-end gap-[2px] h-4 ml-auto">
-      {[0, 1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className={`w-[3px] rounded-sm transition-all duration-150 ${
-            i < bars ? 'bg-green-500' : 'bg-gray-300'
-          }`}
-          style={{ height: `${(i + 1) * 25}%` }}
-        />
-      ))}
-    </div>
+      <ItemActions>
+        <PeerVolumeSlider userId={peer.userId} />
+      </ItemActions>
+    </Item>
   );
 }

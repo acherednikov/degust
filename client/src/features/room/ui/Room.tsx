@@ -75,7 +75,7 @@ export function Room() {
             </li>
             {peers.map((p) => (
               <li key={p.socketId} className="text-sm">
-                {p.displayName} {p.muted && <span className="text-gray-400">🔇</span>}
+                {p.displayName}
               </li>
             ))}
           </ul>
