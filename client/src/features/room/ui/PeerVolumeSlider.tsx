@@ -14,13 +14,13 @@ export function PeerVolumeSlider({ userId }: Props) {
       <span className="text-xs text-gray-400">{Math.round(volume * 100)}%</span>
       <Slider
         value={volume * 100}
-        onValueChange={(value: number) => {
-          console.log('value', value);
-          setVolume(userId, value / 100)
+        onValueChange={(value) => {
+          const volume = value as number;
+          setVolume(userId, volume / 100);
         }}
         min={0}
         max={100}
-        step={5}
+        step={10}
         className="flex-1"
       />
     </div>
