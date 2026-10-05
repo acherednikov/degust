@@ -9,6 +9,12 @@ export function useLocalAudioLevel(
   const [isSpeaking, setIsSpeaking] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
+  // Держим актуальные значения в ref, чтобы не пересоздавать AudioContext
+  const thresholdRef = useRef(threshold);
+  const intervalRef = useRef(intervalMs);
+  thresholdRef.current = threshold;
+  intervalRef.current = intervalMs;
+
   useEffect(() => {
     if (!stream) return;
 
@@ -16,34 +22,46 @@ export function useLocalAudioLevel(
     const source = audioContext.createMediaStreamSource(stream);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.3;
     source.connect(analyser);
 
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    // Safari: AudioContext может быть suspended до user gesture
+    if (audioContext.state === 'suspended') {
+      audioContext.resume().catch(() => {});
+    }
+
+    const dataArray = new Uint8Array(analyser.fftSize);
 
     const update = () => {
-      analyser.getByteFrequencyData(dataArray);
-      const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-      const normalized = avg / 255;
-      // квантуем до 5%, чтобы не дёргать рендер на float-шуме
+      analyser.getByteTimeDomainData(dataArray);
+
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        const v = (dataArray[i] - 128) / 128;
+        sum += v * v;
+      }
+      const rms = Math.sqrt(sum / dataArray.length);
+      const normalized = Math.min(rms * 4, 1);
+      // Квантуем до 5%, чтобы не дёргать рендер на float-шуме
       const quantized = Math.round(normalized * 20) / 20;
 
       setLevel((prev) => (prev === quantized ? prev : quantized));
-      setIsSpeaking((prev) => {
-        const next = quantized > threshold;
-        return prev === next ? prev : next;
-      });
 
-      timeoutRef.current = window.setTimeout(update, intervalMs);
+      const speaking = quantized > thresholdRef.current;
+      setIsSpeaking((prev) => (prev === speaking ? prev : speaking));
+
+      timeoutRef.current = window.setTimeout(update, intervalRef.current);
     };
 
     update();
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
       source.disconnect();
-      audioContext.close();
+      audioContext.close().catch(() => {});
     };
-  }, [stream, threshold, intervalMs]);
+  }, [stream]);
 
   return { level, isSpeaking };
 }

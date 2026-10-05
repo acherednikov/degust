@@ -14,7 +14,7 @@ interface Props {
 
 export function PeerConnection({ peer }: Props) {
   const { remoteStream, pc } = usePeerConnection(peer);
-  const { level, isSpeaking } = usePeerAudioLevel(pc, false, { threshold: 0.05 });
+  const { level, isSpeaking } = usePeerAudioLevel(pc, { threshold: 0.05 });
   const volume = usePeerVolumesStore((s) => s.volumes[peer.userId]) ?? 1;
   const { quality } = usePeerConnectionQuality(pc);
 

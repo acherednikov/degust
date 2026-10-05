@@ -7,7 +7,6 @@ interface AudioLevelResult {
 
 export function usePeerAudioLevel(
   pc: RTCPeerConnection | null,
-  isLocal: boolean,
   options?: { threshold?: number; intervalMs?: number },
 ): AudioLevelResult {
   const threshold = options?.threshold ?? 0.05;
@@ -27,11 +26,11 @@ export function usePeerAudioLevel(
 
         stats.forEach((report) => {
           // Локальный микрофон: media-source
-          if (isLocal && report.type === 'media-source' && report.kind === 'audio') {
-            audioLevel = report.audioLevel ?? 0;
-          }
+          // if (isLocal && report.type === 'media-source' && report.kind === 'audio') {
+          //   audioLevel = report.audioLevel ?? 0;
+          // }
           // Удалённый поток: inbound-rtp
-          if (!isLocal && report.type === 'inbound-rtp' && report.kind === 'audio') {
+          if (report.type === 'inbound-rtp' && report.kind === 'audio') {
             audioLevel = report.audioLevel ?? 0;
           }
         });
@@ -54,7 +53,7 @@ export function usePeerAudioLevel(
         timeoutRef.current = null;
       }
     };
-  }, [pc, isLocal, threshold, intervalMs]);
+  }, [pc, threshold, intervalMs]);
 
   return { level, isSpeaking };
 }
