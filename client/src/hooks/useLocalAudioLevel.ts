@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function useLocalAudioLevel(stream: MediaStream | null, threshold = 0.05) {
+export function useLocalAudioLevel(
+  stream: MediaStream | null,
+  threshold = 0.05,
+  intervalMs = 250,
+) {
   const [level, setLevel] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const rafRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!stream) return;
@@ -18,23 +22,28 @@ export function useLocalAudioLevel(stream: MediaStream | null, threshold = 0.05)
 
     const update = () => {
       analyser.getByteFrequencyData(dataArray);
-      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-      const normalized = average / 255;
+      const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+      const normalized = avg / 255;
+      // квантуем до 5%, чтобы не дёргать рендер на float-шуме
+      const quantized = Math.round(normalized * 20) / 20;
 
-      setLevel(normalized);
-      setIsSpeaking(normalized > threshold);
+      setLevel((prev) => (prev === quantized ? prev : quantized));
+      setIsSpeaking((prev) => {
+        const next = quantized > threshold;
+        return prev === next ? prev : next;
+      });
 
-      rafRef.current = requestAnimationFrame(update);
+      timeoutRef.current = window.setTimeout(update, intervalMs);
     };
 
     update();
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       source.disconnect();
       audioContext.close();
     };
-  }, [stream, threshold]);
+  }, [stream, threshold, intervalMs]);
 
   return { level, isSpeaking };
 }

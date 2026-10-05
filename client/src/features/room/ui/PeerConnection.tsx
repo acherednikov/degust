@@ -15,17 +15,16 @@ interface Props {
 export function PeerConnection({ peer }: Props) {
   const { remoteStream, pc } = usePeerConnection(peer);
   const { level, isSpeaking } = usePeerAudioLevel(pc, false, { threshold: 0.05 });
-  const volume = usePeerVolumesStore((s) => s.volumes[peer.userId]);
+  const volume = usePeerVolumesStore((s) => s.volumes[peer.userId]) ?? 1;
   const { quality } = usePeerConnectionQuality(pc);
 
   const audioRef = useRef<HTMLAudioElement>(null);
-  console.log('+> peer conn . vol', volume)
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
     
-    audio.volume = volume;
+    if (volume !== undefined) audio.volume = volume;
   }, [volume]);
 
   useEffect(() => {

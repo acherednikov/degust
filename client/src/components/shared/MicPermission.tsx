@@ -7,8 +7,6 @@ export function MicPermission() {
   const { permission, error, requesting, requestMedia, enabled, toggleMute, stream } =
     useLocalMedia();
 
-  console.log('[mic] stream:', stream, 'tracks:', stream?.getAudioTracks().length);
-
   if (!stream) {
     return (
       <div className="flex items-center gap-3">

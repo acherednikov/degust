@@ -5,7 +5,7 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from '@/components/ui/item';
+} from '@/components/shared/item';
 import { ConnectionQualityIndicator } from './ConnectionQualityIndicator';
 import { PeerVolumeSlider } from './PeerVolumeSlider';
 import { SignalBars } from './SignalBars';
@@ -57,7 +57,7 @@ export function PeerItem({ peer, isSpeaking, level, quality, isSelf = false }: P
           {peer.muted && <span className="text-xs text-gray-400">🔇</span>}
         </ItemTitle>
         {!isSelf && <ItemDescription>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <ConnectionQualityIndicator quality={quality} />
             <p>{QUALITY_LABEL[quality]}</p>
           </div>
